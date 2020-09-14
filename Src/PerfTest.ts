@@ -1,4 +1,5 @@
 import Benchmark from "benchmark";
+import StdOutAppender from "./StdOutAppender";
 
 const GlobalPrefix: string = "xXx_PerfTest_xXx";
 
@@ -6,7 +7,9 @@ export type TPerfTestConfig =
 {
     Name: string;
     Function: Function;
+    FunctionReturnsPromise?: boolean;
     State?: TKeyValue[];
+    Console?: boolean;
 };
 
 export type TKeyValue =
@@ -15,10 +18,25 @@ export type TKeyValue =
     Value: any;
 };
 
+export type TTestResult =
+{
+    Name: string;
+    Hz: {
+        Mean: number;
+        Deviation: number;
+    };
+    Time: {
+        Mean: number;
+        Deviation: number;
+    };
+};
+
 export default class PerfTest
 {
+    private readonly mConsoleEnabled: boolean;
     private readonly mGlobalKeys: string[] = [];
     private readonly mBenchmarkJS: Benchmark;
+    private mTestResolve: (aValue: TTestResult) => void = undefined!;
 
     public constructor(aConfig: TPerfTestConfig)
     {
@@ -29,12 +47,28 @@ export default class PerfTest
             lSetupFunction = this.CreateSetUpFunction(aConfig.State);
         }
 
+        this.mConsoleEnabled = aConfig.Console || false;
+
+        let lTestedFunction: Function = aConfig.Function;
+        if (aConfig.FunctionReturnsPromise)
+        {
+            lTestedFunction = function TestFunc(deferred: any): void
+            {
+                aConfig.Function()
+                    .then(() =>
+                    {
+                        deferred.resolve();
+                    });
+            };
+        }
+
         this.mBenchmarkJS = new Benchmark(
             {
                 name: aConfig.Name,
-                fn: aConfig.Function,
+                fn: lTestedFunction,
                 setup: lSetupFunction,
                 onComplete: this.OnComplete.bind(this),
+                defer: aConfig.FunctionReturnsPromise || undefined,
             },
         );
     }
@@ -58,6 +92,24 @@ export default class PerfTest
         }
 
         return lFunctionString;
+    }
+
+    private FormatBenchmarkResult(aCompletionEvent: Benchmark.Event, lStandardDeviation: number): TTestResult
+    {
+        const lResult: TTestResult =
+        {
+            Name: aCompletionEvent.target.options.name || "UnNamedTest",
+            Hz: {
+                Mean: aCompletionEvent.target.hz!,
+                Deviation: aCompletionEvent.target.hz! * lStandardDeviation,
+            },
+            Time: {
+                Mean: aCompletionEvent.target.times!.period!,
+                Deviation: aCompletionEvent.target.stats!.deviation,
+            },
+        };
+
+        return lResult;
     }
 
     private GenGlobalKey(aKeyValue: TKeyValue): string
@@ -86,8 +138,17 @@ export default class PerfTest
 
     private OnComplete(aCompletionEvent: Benchmark.Event): void
     {
-        // tslint:disable-next-line:no-console
-        console.log(aCompletionEvent);
+        const lMeanTime: number = aCompletionEvent.target.times!.period!;
+        const lTimeDeviation: number = aCompletionEvent.target.stats!.deviation;
+        const lStandardDeviation: number = lTimeDeviation / lMeanTime;
+        const lResult: TTestResult = this.FormatBenchmarkResult(aCompletionEvent, lStandardDeviation);
+
+        this.mTestResolve(lResult);
+        if (this.mConsoleEnabled)
+        {
+            StdOutAppender.WriteResult(lResult);
+        }
+
         this.CleanUpGlobalState();
     }
 
@@ -99,11 +160,12 @@ export default class PerfTest
         }
     }
 
-    public Run(): Promise<any>
+    public Run(): Promise<TTestResult>
     {
-        return new Promise<any>((aResolve: (value: any) => void): void =>
+        return new Promise<TTestResult>((aResolve: (value: TTestResult) => void): void =>
         {
-            this.mBenchmarkJS.run({ onComplete: aResolve });
+            this.mTestResolve = aResolve;
+            this.mBenchmarkJS.run();
         });
     }
 }

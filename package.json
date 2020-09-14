@@ -1,19 +1,19 @@
 {
-  "name": "reliable-zeromq",
-  "version": "0.1.6",
-  "description": "A collection of reliable zeromq messaging constructs",
+  "name": "perf-test",
+  "version": "0.0.1",
+  "description": "A simple performance testing utility written in typescript",
   "main": "Dist/Src/Index.js",
   "types": "Dist/Src/Index.d.ts",
   "dependencies": {
-    "@types/benchmark": "^1.0.33",
+    "@types/benchmark": "1.0.33",
     "benchmark": "2.1.4"
   },
   "devDependencies": {
-    "del": "^5.1.0",
+    "del": "5.1.0",
     "gulp": "4.0.2",
     "husky": "4.2.5",
-    "tslint": "^5.20.1",
-    "tslint-eslint-rules": "^5.4.0",
+    "tslint": "5.20.1",
+    "tslint-eslint-rules": "5.4.0",
     "typescript": "4.0.2"
   },
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OliverNChalk/reliable-zeromq.git"
+    "url": "git+https://github.com/OliverNChalk/perf-test.git"
   },
   "husky": {
     "hooks": {
@@ -31,11 +31,18 @@
     }
   },
   "prepublishOnly": "gulp build",
-  "keywords": [],
+  "keywords": [
+    "perf-test",
+    "perf",
+    "test",
+    "performance",
+    "testing",
+    "benchmark"
+  ],
   "author": "Oliver Chalk",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/OliverNChalk/reliable-zeromq/issues"
+    "url": "https://github.com/OliverNChalk/perf-test/issues"
   },
-  "homepage": "https://github.com/OliverNChalk/reliable-zeromq#readme"
+  "homepage": "https://github.com/OliverNChalk/perf-test#readme"
 }

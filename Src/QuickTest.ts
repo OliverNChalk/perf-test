@@ -18,13 +18,36 @@ const lBench: PerfTest = new PerfTest(
         Name: "Array.map",
         Function: TestFunc,
         State: [ { Key: "lStartArray", Value: lStartArray } ],
+        Console: true,
     },
 );
 
-lBench.Run()
-    .then((aAny: any) =>
+function TestFunc2(): Promise<void>
+{
+    return new Promise((aResolve: () => void) =>
     {
-        console.log("DONE:");
-        console.log(aAny);
-        console.log(lBench["mBenchmarkJS"]);
+        setTimeout(() => { aResolve(); }, 25);
     });
+}
+
+const lBench2: PerfTest = new PerfTest(
+    {
+        Name: "setTimeout25",
+        Function: TestFunc2,
+        FunctionReturnsPromise: true,
+        Console: true,
+    },
+);
+
+async function main(): Promise<void>
+{
+    const lResult = await lBench.Run();
+    console.log("1 DONE:");
+    console.log(lResult);
+
+    const lResult2 = await lBench2.Run();
+    console.log("2 DONE:");
+    console.log(lResult2);
+}
+
+main();
