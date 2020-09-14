@@ -1,0 +1,41 @@
+{
+  "name": "reliable-zeromq",
+  "version": "0.1.6",
+  "description": "A collection of reliable zeromq messaging constructs",
+  "main": "Dist/Src/Index.js",
+  "types": "Dist/Src/Index.d.ts",
+  "dependencies": {
+    "@types/benchmark": "^1.0.33",
+    "benchmark": "2.1.4"
+  },
+  "devDependencies": {
+    "del": "^5.1.0",
+    "gulp": "4.0.2",
+    "husky": "4.2.5",
+    "tslint": "^5.20.1",
+    "tslint-eslint-rules": "^5.4.0",
+    "typescript": "4.0.2"
+  },
+  "scripts": {
+    "prepublishOnly": "gulp build",
+    "test": "gulp test",
+    "build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OliverNChalk/reliable-zeromq.git"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "gulp lint-check"
+    }
+  },
+  "prepublishOnly": "gulp build",
+  "keywords": [],
+  "author": "Oliver Chalk",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/OliverNChalk/reliable-zeromq/issues"
+  },
+  "homepage": "https://github.com/OliverNChalk/reliable-zeromq#readme"
+}
