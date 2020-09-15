@@ -10,7 +10,7 @@ const SrcFolder   = `${RootFolder}/Src`;
 const TestFolder  = `${DistFolder}/Test`;
 
 const _TSC_       =  `${RootFolder}/node_modules/typescript/bin/tsc`;
-const _AVA_       = `node ${RootFolder}/node_modules/ava/cli.js`;
+const _AVA_       = `node ${RootFolder}/node_modules/ava/cli.js --timeout=30s`;
 const _NYC_       = `node ${RootFolder}/node_modules/nyc/bin/nyc.js --reporter=lcov ${_AVA_}`;
 const _TSLINT_    = `${RootFolder}/node_modules/tslint/bin/tslint`;
 

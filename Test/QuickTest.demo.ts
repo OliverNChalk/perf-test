@@ -1,5 +1,5 @@
 /* tslint:disable */
-import PerfTest from "./PerfTest";
+import { PerfTest } from "../Src/PerfTest";
 
 const lStartArray: string[] = [];
 

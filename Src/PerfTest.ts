@@ -7,7 +7,7 @@ export type TPerfTestConfig =
 {
     Name: string;
     Function: Function;
-    FunctionReturnsPromise?: boolean;
+    FunctionReturnsPromise?: true | undefined;
     State?: TKeyValue[];
     Console?: boolean;
 };
@@ -31,44 +31,29 @@ export type TTestResult =
     };
 };
 
-export default class PerfTest
+export class PerfTest
 {
+    private readonly mBenchmarkJS: Benchmark;
     private readonly mConsoleEnabled: boolean;
     private readonly mGlobalKeys: string[] = [];
-    private readonly mBenchmarkJS: Benchmark;
+    private readonly mTestState: TKeyValue[] | undefined;
     private mTestResolve: (aValue: TTestResult) => void = undefined!;
 
     public constructor(aConfig: TPerfTestConfig)
     {
-        let lSetupFunction: string | undefined = undefined;
-        if (aConfig.State !== undefined)
-        {
-            this.SetUpState(aConfig.State);
-            lSetupFunction = this.CreateSetUpFunction(aConfig.State);
-        }
-
         this.mConsoleEnabled = aConfig.Console || false;
+        this.mTestState = aConfig.State;
 
-        let lTestedFunction: Function = aConfig.Function;
-        if (aConfig.FunctionReturnsPromise)
-        {
-            lTestedFunction = function TestFunc(deferred: any): void
-            {
-                aConfig.Function()
-                    .then(() =>
-                    {
-                        deferred.resolve();
-                    });
-            };
-        }
+        const lSetupFunction: string | undefined = this.CreateSetUpFunction();
+        const lTestedFunction: Function = this.CreateTestFunction(aConfig);
 
         this.mBenchmarkJS = new Benchmark(
             {
                 name: aConfig.Name,
-                fn: lTestedFunction,
                 setup: lSetupFunction,
+                fn: lTestedFunction,
                 onComplete: this.OnComplete.bind(this),
-                defer: aConfig.FunctionReturnsPromise || undefined,
+                defer: aConfig.FunctionReturnsPromise,
             },
         );
     }
@@ -81,7 +66,18 @@ export default class PerfTest
         }
     }
 
-    private CreateSetUpFunction(aKeyValues: TKeyValue[]): string
+    private CreateSetUpFunction(): string | undefined
+    {
+        let lSetupFunction: string | undefined = undefined;
+        if (this.mTestState !== undefined)
+        {
+            lSetupFunction = this.CreateSetUpString(this.mTestState);
+        }
+
+        return lSetupFunction;
+    }
+
+    private CreateSetUpString(aKeyValues: TKeyValue[]): string
     {
         let lFunctionString: string = "";
 
@@ -92,6 +88,24 @@ export default class PerfTest
         }
 
         return lFunctionString;
+    }
+
+    private CreateTestFunction(aConfig: TPerfTestConfig): Function
+    {
+        let lTestedFunction: Function = aConfig.Function;
+        if (aConfig.FunctionReturnsPromise)
+        {
+            lTestedFunction = function AsyncWrapper(deferred: any): void
+            {
+                aConfig.Function()
+                    .then(() =>
+                    {
+                        deferred.resolve();
+                    });
+            };
+        }
+
+        return lTestedFunction;
     }
 
     private FormatBenchmarkResult(aCompletionEvent: Benchmark.Event, lStandardDeviation: number): TTestResult
@@ -162,6 +176,11 @@ export default class PerfTest
 
     public Run(): Promise<TTestResult>
     {
+        if (this.mTestState !== undefined)
+        {
+            this.SetUpState(this.mTestState);
+        }
+
         return new Promise<TTestResult>((aResolve: (value: TTestResult) => void): void =>
         {
             this.mTestResolve = aResolve;

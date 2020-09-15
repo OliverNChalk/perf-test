@@ -1,3 +1,5 @@
 .idea
 node_modules
 Dist
+coverage
+.nyc_output
