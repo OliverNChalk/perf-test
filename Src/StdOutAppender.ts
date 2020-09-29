@@ -6,8 +6,8 @@ export default class StdOutAppender
     {
         const lPercentDeviation: number = aTestResult.Hz.Deviation / aTestResult.Hz.Mean * 100;
         const lOutput: string = aTestResult.Name
-         + " | " + `${aTestResult.Hz.Mean} (±${lPercentDeviation.toFixed(3)}%) ops/s`
-         + " | " + `${(aTestResult.Time.Mean * 1000).toFixed(6)} ms average time`;
+             + " | " + `${aTestResult.Hz.Mean} (±${lPercentDeviation.toFixed(3)}%) ops/s`
+             + " | " + `${(aTestResult.Time.Mean * 1000).toFixed(6)} ms average time`;
 
         return lOutput;
     }

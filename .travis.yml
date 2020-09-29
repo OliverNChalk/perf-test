@@ -9,5 +9,5 @@ script:
   - gulp lint-check
   - gulp build
   - gulp coverage
-  after_success:
-    - gulp coverage-report
+after_success:
+  - gulp coverage-report
