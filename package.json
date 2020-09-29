@@ -1,6 +1,6 @@
 {
   "name": "simple-perf",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A simple performance testing utility written in typescript",
   "main": "Dist/Src/Index.js",
   "types": "Dist/Src/Index.d.ts",
